@@ -1,0 +1,7 @@
+openai
+openai-agents
+chromadb
+langchain-chroma
+langchain
+pypdf
+openai-agents[viz]
