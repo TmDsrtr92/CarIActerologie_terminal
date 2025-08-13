@@ -3,5 +3,7 @@ openai-agents
 chromadb
 langchain-chroma
 langchain
+langchain-openai
 pypdf
 openai-agents[viz]
+rich
