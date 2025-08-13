@@ -1,104 +1,135 @@
 import os
-from dotenv import load_dotenv
-from agents import Agent, Runner
 import asyncio
-from tools.vector_search import search_caracterologie_knowledge
+from dotenv import load_dotenv
+from agents import Runner, TResponseInputItem
+from agent_config import create_agents, get_agent_by_name
 from openai.types.responses import ResponseTextDeltaEvent
 from rich.console import Console
 from rich.panel import Panel
-from rich.text import Text
-from rich.markdown import Markdown
 from rich.prompt import Prompt
-from rich.live import Live
-from rich.spinner import Spinner
-from rich import print as rprint
+from rich.columns import Columns
+from rich.rule import Rule
+from ui import (
+    create_header, create_agents_info, create_commands_table,
+    display_response, show_thinking_message, clear_screen, show_help,
+    show_goodbye_message, show_error_panel, show_interrupt_message
+)
 
 load_dotenv()
-
 console = Console()
 
+# API Key validation
 if os.getenv('OPENAI_API_KEY'):
-    console.print("✅ API Key loaded successfully", style="green")
+    console.print("[green]API Key chargée avec succès[/green]")
 else:
-    console.print("❌ API Key not found", style="red")
+    console.print("[red]API Key non trouvée[/red]")
+    exit(1)
 
-caracteriologue_agent = Agent(
-    name="Caractériologue",
-    instructions="Tu aide les utilisateurs à connaitre leur caractère. Tu réponds en français. Tu te présentes en tant que Caractériologue. Tu utilises l'outil search_caracterologie_knowledge pour trouver les informations dans la base de données.",
-    model="gpt-4.1-mini",
-    tools=[search_caracterologie_knowledge]
-)
+# Initialize agents
+agents = create_agents()
 
-interrogateur_agent = Agent(
-    name="Interrogateur",
-    instructions="Tu poses des questions à l'utilisateur pour connaitre son caractère. Tu réponds en français. Tu te présentes en tant que Interrogateur.",
-    model="gpt-4.1-mini"
-)
-
-trieur_agent = Agent(
-    name="Trieur",
-    instructions="Tu détermines quel agent utiliser en fonction de la question de l'utilisateur",
-    handoffs=[caracteriologue_agent, interrogateur_agent],
-    model="gpt-4o-mini"
-)
+# Create a session instance with a session ID
 
 async def main():
-    # Welcome banner
-    welcome_panel = Panel.fit(
-        "[bold blue]🧠 Système de Caractérologie[/bold blue]\n"
-        "[dim]Découvrez votre personnalité avec l'IA[/dim]",
-        border_style="blue",
-        padding=(1, 2)
-    )
-    console.print(welcome_panel)
+    # Setup UI
+    clear_screen()
+    console.print(create_header())
+    console.print()
+    console.print(Columns([
+        create_agents_info(),
+        create_commands_table()
+    ], equal=True, expand=True))
+    console.print()
+    console.print(Rule("[dim]Commencez la conversation ci-dessous[/dim]", style="dim"))
+    console.print()
     
-    console.print("[dim]💡 Tapez 'quit' ou 'exit' pour quitter[/dim]")
-    console.print("[dim]🔄 L'agent se souviendra automatiquement des messages précédents[/dim]\n")
+    conversation_count = 0
+    
+    convo: list[TResponseInputItem] = []
+    last_agent = agents["trieur"]
 
     while True:
         try:
-            # Get user input with rich prompt
-            user_input = Prompt.ask("[bold cyan]Vous[/bold cyan]").strip()
-
-            # Check for exit commands
+            # Get user input
+            user_input = Prompt.ask(
+                f"[bold cyan]💬 Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
+            ).strip()
+            convo.append({"content": user_input, "role": "user"})
+            #print("Historique de conversation: ", convo)
+            
+            # Handle commands
             if user_input.lower() in ['quit', 'exit', 'q']:
-                console.print(Panel("👋 [bold yellow]Au revoir![/bold yellow]", border_style="yellow"))
+                console.print(show_goodbye_message())
                 break
-
-            # Skip empty inputs
+            elif user_input.lower() == 'clear':
+                clear_screen()
+                console.print(create_header())
+                console.print()
+                continue
+            elif user_input.lower() == 'help':
+                show_help()
+                continue
+            elif user_input.lower() == 'agents':
+                console.print(create_agents_info())
+                continue
+            
             if not user_input:
                 continue
-
-            # Show processing with spinner
-            with console.status("[bold green]🤔 Analyse en cours...", spinner="dots"):
-                result = Runner.run_streamed(caracteriologue_agent, user_input)
+            
+            conversation_count += 1
+            
+            # Process request
+            await show_thinking_message()
+            
+            try:
+                print(f"DEBUG: About to call Runner.run_streamed with last_agent type: {last_agent.name}")
+                print(f"DEBUG: last_agent name: {last_agent.name}")
+                print(f"DEBUG: convo type: {type(convo)}, length: {len(convo)}")
                 
-                # Collect response text
+                result = Runner.run_streamed(last_agent, convo)
+                print("DEBUG: Runner.run_streamed completed successfully")
+                
                 response_text = ""
+                console.print("[dim]🔄 Traitement en cours...[/dim]")
+                
+                print("DEBUG: About to start streaming events")
                 async for event in result.stream_events():
                     if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
                         response_text += event.data.delta
-
-            # Display the response in a beautiful panel
-            if result.final_output:
-                response_panel = Panel(
-                    Markdown(result.final_output),
-                    title="[bold green]🤖 Caractériologue[/bold green]",
-                    border_style="green",
-                    padding=(1, 2)
-                )
-                console.print(response_panel)
+                print("DEBUG: Finished streaming events")
+                
+                # Clear processing message
+                console.print("\033[1A\033[K", end="")
+                
+                # Display response
+                if result.final_output:
+                    print(f"DEBUG: result.last_agent.name: {result.last_agent.name}")
+                    last_agent = result.last_agent
+                    print(f"DEBUG: About to display response, last_agent type: {result.last_agent.name}")
+                    display_response(result.last_agent.name, result.final_output) 
+                else:
+                    console.print(Panel("[red] Aucune réponse reçue[/red]", border_style="red"))
+                
+            except Exception as processing_error:
+                print(f"DEBUG: Exception caught: {processing_error}")
+                print(f"DEBUG: Exception type: {type(processing_error)}")
+                console.print(show_error_panel(str(processing_error), "Erreur de traitement"))
+                continue
+                
+            print("DEBUG: About to call result.to_input_list()")
+            convo = result.to_input_list()
+            print("DEBUG: result.to_input_list() completed")
+            
+            print(f"DEBUG: Updated last_agent: {last_agent.name}")
             console.print()
-
+           
+            
+            
         except KeyboardInterrupt:
-            console.print("\n[yellow]👋 Au revoir![/yellow]")
+            console.print(show_interrupt_message())
             break
         except Exception as e:
-            error_panel = Panel(
-                f"[bold red]❌ Erreur:[/bold red] {e}",
-                border_style="red"
-            )
-            console.print(error_panel)
+            console.print(show_error_panel(str(e)))
 
 if __name__ == "__main__":
     asyncio.run(main())
