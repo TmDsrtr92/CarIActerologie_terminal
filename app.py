@@ -84,45 +84,42 @@ async def main():
             await show_thinking_message()
             
             try:
-                print(f"DEBUG: About to call Runner.run_streamed with last_agent type: {last_agent.name}")
-                print(f"DEBUG: last_agent name: {last_agent.name}")
-                print(f"DEBUG: convo type: {type(convo)}, length: {len(convo)}")
+                
                 
                 result = Runner.run_streamed(last_agent, convo)
-                print("DEBUG: Runner.run_streamed completed successfully")
+               
                 
                 response_text = ""
                 console.print("[dim]🔄 Traitement en cours...[/dim]")
                 
-                print("DEBUG: About to start streaming events")
+                
                 async for event in result.stream_events():
                     if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
                         response_text += event.data.delta
-                print("DEBUG: Finished streaming events")
+                
                 
                 # Clear processing message
                 console.print("\033[1A\033[K", end="")
                 
                 # Display response
                 if result.final_output:
-                    print(f"DeBUG: result.last_agent.name: {result.last_agent.name}")
+
                     last_agent = result.last_agent
-                    print(f"DEBUG: About to display response, last_agent type: {result.last_agent.name}")
+                    
                     display_response(result.last_agent.name, result.final_output) 
                 else:
                     console.print(Panel("[red] Aucune réponse reçue[/red]", border_style="red"))
                 
             except Exception as processing_error:
-                print(f"DEBUG: Exception caught: {processing_error}")
-                print(f"DEBUG: Exception type: {type(processing_error)}")
+              
                 console.print(show_error_panel(str(processing_error), "Erreur de traitement"))
                 continue
                 
-            print("DEBUG: About to call result.to_input_list()")
-            convo = result.to_input_list()
-            print("DEBUG: result.to_input_list() completed")
             
-            print(f"DEBUG: Updated last_agent: {last_agent.name}")
+            convo = result.to_input_list()
+            
+            
+            
             console.print()
            
             
