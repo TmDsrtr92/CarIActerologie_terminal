@@ -7,3 +7,4 @@ langchain-openai
 pypdf
 openai-agents[viz]
 rich
+mem0ai

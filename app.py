@@ -15,8 +15,10 @@ from ui import (
     show_goodbye_message, show_error_panel, show_interrupt_message
 )
 
+
 load_dotenv()
 console = Console()
+
 
 # API Key validation
 if os.getenv('OPENAI_API_KEY'):
@@ -103,7 +105,7 @@ async def main():
                 
                 # Display response
                 if result.final_output:
-                    print(f"DEBUG: result.last_agent.name: {result.last_agent.name}")
+                    print(f"DeBUG: result.last_agent.name: {result.last_agent.name}")
                     last_agent = result.last_agent
                     print(f"DEBUG: About to display response, last_agent type: {result.last_agent.name}")
                     display_response(result.last_agent.name, result.final_output) 

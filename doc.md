@@ -8,3 +8,7 @@ source .venv\Scripts\activate
 [X] Setup OpenAI API key
 [X] Creating vector store from chromaDB
 [X] Creating agent using the vector store
+[X] Creating session memory
+[ ] Creating one agent per character
+
+

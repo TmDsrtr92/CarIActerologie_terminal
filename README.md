@@ -30,7 +30,12 @@ Système de caractérologie intelligent avec **interface Rich** utilisant l'IA e
 ```
 CarIActerologie_terminal/
 ├── app.py                          # Point d'entrée principal (minimal)
-├── agent_config.py                 # Configuration des agents IA
+├── agent_config.py                 # Configuration et création des agents
+├── agent/                          # Dossier des agents spécialisés
+│   ├── trieur.py                   # Agent de routage intelligent
+│   ├── caracteriologue.py          # Expert en caractérologie
+│   ├── interrogateur.py            # Spécialiste questionnaire
+│   └── profiler.py                 # Générateur de profils
 ├── ui.py                          # Interface utilisateur Rich
 ├── tools/
 │   └── vector_search.py           # Outil de recherche vectorielle
@@ -51,39 +56,59 @@ CarIActerologie_terminal/
    - Orchestration des agents et de l'interface
    - ~100 lignes de code clean
 
-2. **`agent_config.py`** - Configuration des agents
-   - **Instructions structurées** : Formatage propre avec triple quotes
-   - **Variables séparées** : `caracteriologue_instructions`, `interrogateur_instructions`, `trieur_instructions`
-   - **Sections organisées** : Rôle, méthodologie, style, règles de routage
-   - **Handoffs configurés** : Transferts intelligents entre agents
-   - **Fonction centralisée** : `create_agents()` pour instanciation
+2. **`agent_config.py`** - Configuration et création des agents
+   - **Architecture modulaire** : Import des agents depuis le dossier `agent/`
+   - **Fonction centralisée** : `create_agents()` crée tous les agents et configure les handoffs
+   - **Gestion des handoffs** : Configuration des transferts entre agents
+   - **Agent retrieval** : Fonction `get_agent_by_name()` pour récupération d'agent
 
-3. **`ui.py`** - Interface utilisateur Rich
+3. **Dossier `agent/`** - Agents spécialisés modulaires
+   - **`trieur.py`** : Agent de routage avec logique de redirection
+   - **`caracteriologue.py`** : Expert en caractérologie avec recherche vectorielle
+   - **`interrogateur.py`** : Questionnaire en 3 étapes (Activité, Émotivité, Retentissement)
+   - **`profiler.py`** : Générateur de profils caractérologiques
+   - **Architecture propre** : Chaque agent dans son propre fichier avec fonction `create_*_agent()`
+   - **Instructions structurées** : Rôle, méthodologie, style définis par agent
+   - **Séparation claire** : Instructions et logique métier isolées par responsabilité
+
+4. **`ui.py`** - Interface utilisateur Rich
    - Toutes les fonctions d'affichage
    - Formatage et stylisme
    - Panneaux, tableaux, headers
 
-### 🤖 Agents IA Spécialisés
+### 🤖 Agents IA Spécialisés (Architecture Modulaire)
 
-1. **🧑‍🔬 Caractériologue** (vert)
+Chaque agent est maintenant dans son propre fichier dans le dossier `agent/`:
+
+1. **🧑‍🔬 Caractériologue** (`agent/caracteriologue.py`)
    - **Rôle** : Expert en analyse et théorie de la caractérologie
    - **Outils** : Recherche vectorielle dans le traité de caractérologie
    - **Capacités** : Analyse détaillée, identification des 8 types de caractères
    - **Modèle** : `gpt-4.1-mini`
    - **Méthodologie** : Pédagogique et scientifique
+   - **Fonction** : `create_caracteriologue_agent()`
 
-2. **❓ Interrogateur** (jaune)
+2. **❓ Interrogateur** (`agent/interrogateur.py`)
    - **Rôle** : Évaluation personnalisée par questionnaire en 3 étapes
    - **Processus** : Activité → Émotivité → Retentissement
    - **Questions clés** : Obstacles, émotions, poids du passé
    - **Modèle** : `gpt-4.1-mini`
    - **Handoff** : Transfère vers Caractériologue pour analyse finale
+   - **Fonction** : `create_interrogateur_agent()`
 
-3. **🎯 Trieur** (magenta)
+3. **🎯 Trieur** (`agent/trieur.py`)
    - **Rôle** : Agent de routage intelligent
    - **Logique** : Questions théoriques → Caractériologue, Évaluation → Interrogateur
    - **Style** : Concis et orienté solution
    - **Modèle** : `gpt-4o-mini`
+   - **Fonction** : `create_trieur_agent()`
+
+4. **📊 Profiler** (`agent/profiler.py`)
+   - **Rôle** : Générateur de profils caractérologiques structurés
+   - **Output** : Profil UserProfile avec émotivité, activité, retentissement
+   - **Analyse** : Basée sur l'historique de conversation
+   - **Modèle** : `gpt-4o-mini`
+   - **Fonction** : `create_profiler_agent()`
 
 ### 🔍 Recherche Vectorielle (`tools/vector_search.py`)
 - Fonction `search_caracterologie_knowledge()` pour interroger la base de connaissances
