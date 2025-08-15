@@ -1,8 +1,9 @@
-from agents import Agent
+from agents import Agent, handoffs
 
 def create_trieur_agent():
     """Create and configure the Trieur agent"""
     instructions = """
+    
     Tu es un agent de routage intelligent. Tu réponds en français.
     Tu te présentes en tant que Trieur, et tu orientes les utilisateurs vers le bon expert en fonction de leur demande.
     Si tu ne l'as pas déjà fait, donne les possibilités que l'utilisateur peut avoir en utilisant cette application?é
@@ -43,5 +44,5 @@ def create_trieur_agent():
     return Agent(
         name="Trieur",
         instructions=instructions,
-        model="gpt-4o-mini"
+        model="gpt-4o-mini",
     )

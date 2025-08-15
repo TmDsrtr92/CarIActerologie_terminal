@@ -10,10 +10,10 @@ def create_agents():
     interrogateur_agent = create_interrogateur_agent()
     profiler_agent = create_profiler_agent()
 
-    caracteriologue_agent.handoffs = [trieur_agent]
-    interrogateur_agent.handoffs = [caracteriologue_agent, trieur_agent]
-    trieur_agent.handoffs = [caracteriologue_agent, interrogateur_agent, profiler_agent]
-    profiler_agent.handoffs = [trieur_agent]  
+    #caracteriologue_agent.handoffs = [trieur_agent]
+    interrogateur_agent.handoffs = [caracteriologue_agent]
+    trieur_agent.handoffs = [caracteriologue_agent, interrogateur_agent]
+    #profiler_agent.handoffs = [trieur_agent]  
 
 
     return {

@@ -1,5 +1,6 @@
 import os
 import asyncio
+import random
 from dotenv import load_dotenv
 from agents import Runner, TResponseInputItem
 from agent_config import create_agents, get_agent_by_name
@@ -14,10 +15,15 @@ from ui import (
     display_response, show_thinking_message, clear_screen, show_help,
     show_goodbye_message, show_error_panel, show_interrupt_message
 )
-
+from mem0 import MemoryClient
+from user_context import current_user
 
 load_dotenv()
 console = Console()
+
+# Initialize Mem0 client
+client = MemoryClient()
+
 
 
 # API Key validation
@@ -46,8 +52,24 @@ async def main():
     console.print()
     
     conversation_count = 0
+    # create user id
+    user_id = random.randint(1, 1000000)
+    print("user_id: ", user_id)
     
-    convo: list[TResponseInputItem] = []
+    # Set global user context for memory tools
+    current_user.set_user_id(user_id)
+    
+    filters = {
+        "OR": [
+            {
+                "user_id": user_id
+            }
+        ]
+    }
+    memory = client.get_all(user_id=user_id, filters=filters, version="v2")
+    print("memory: ", memory)
+    
+   # convo: list[TResponseInputItem] = []
     last_agent = agents["trieur"]
 
     while True:
@@ -56,7 +78,7 @@ async def main():
             user_input = Prompt.ask(
                 f"[bold cyan]💬 Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
             ).strip()
-            convo.append({"content": user_input, "role": "user"})
+            #convo.append({"content": user_input, "role": "user"})
             #print("Historique de conversation: ", convo)
             
             # Handle commands
@@ -79,6 +101,7 @@ async def main():
                 continue
             
             conversation_count += 1
+            print("conversation_count: ", conversation_count)
             
             # Process request
             await show_thinking_message()
@@ -86,16 +109,16 @@ async def main():
             try:
                 
                 
-                result = Runner.run_streamed(last_agent, convo)
+                result = await Runner.run(last_agent, user_input)
                
                 
-                response_text = ""
-                console.print("[dim]🔄 Traitement en cours...[/dim]")
+                #response_text = ""
+                #console.print("[dim]🔄 Traitement en cours...[/dim]")
                 
                 
-                async for event in result.stream_events():
-                    if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
-                        response_text += event.data.delta
+                #async for event in result.stream_events():
+                #    if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
+                #        response_text += event.data.delta
                 
                 
                 # Clear processing message
@@ -116,7 +139,7 @@ async def main():
                 continue
                 
             
-            convo = result.to_input_list()
+            #convo = result.to_input_list()
             
             
             

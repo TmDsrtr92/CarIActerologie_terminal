@@ -1,4 +1,5 @@
-from agents import Agent
+from agents import Agent, ModelSettings
+from tools.memory_tools import search_memory, save_memory
 
 def create_interrogateur_agent():
     """Create and configure the Interrogateur agent"""
@@ -32,12 +33,15 @@ def create_interrogateur_agent():
        → Oui = SECONDAIRE
        → Non = PRIMAIRE
     
-    - Si tu reçois une demande d'un utilisateur et tu ne sais pas quoi répondre, ou que c'est lié à une question générale sur la caracterologie, et que la demande ne vient pas directement de l'agent trieur, alors tu transfères la demande à l'agent Trieur.
-
+      OUTILS À DISPOSITION :
+    • search_memory : Pour rechercher dans la mémoire des intéractions passés avec cet utilisateur. Cela te permet notamment de savoir si tu as déjà répondu à une question. 
+    • save_memory : Pour enregistrer dans la mémoire les intéractions avec cet utilisateur. Cela te permet notamment d'enregistré le paramètre correspondant d'un utilisateur en fonction de sa réponse (active / non actif, emotif / non emotif, primaire / secondaire)
     """
     
     return Agent(
         name="Interrogateur", 
         instructions=instructions,
-        model="gpt-4.1-mini",
+        model="gpt-4.1",
+        tools=[search_memory, save_memory],
+        model_settings=ModelSettings(tool_choice="required"),
     )
