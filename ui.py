@@ -88,7 +88,7 @@ def display_response(agent_name, response_text, response_type="response"):
     response_panel = Panel(
         Markdown(response_text),
         title=f"[bold {color}]{emoji} {agent_name}[/bold {color}]",
-        title_align="left",
+        title_align="center",
         border_style=color,
         padding=(1, 2),
         box=ROUNDED

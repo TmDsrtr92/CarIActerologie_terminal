@@ -6,9 +6,10 @@ source .venv\Scripts\activate
 
 # To do 
 [X] Setup OpenAI API key
-[X] Creating vector store from chromaDB
+[X] Vector store from chromaDB
 [X] Creating agent using the vector store
-[X] Creating long term memory with mem0
-[ ] Creating one agent per character
+[ ] Short memory with to_input_list
+[X] Long term memory with mem0
+[ ] One agent per character
 
 

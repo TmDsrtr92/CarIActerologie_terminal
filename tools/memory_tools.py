@@ -29,13 +29,14 @@ def search_memory(query: str, user_id: str = None) -> str:
     
     try:
         #memories = mem0.search(query, user_id=user_id, limit=3, version="v2")
-        memories = mem0.get_all(
+        memories = mem0.search(
+            query=query,
+            version="v2",
             filters={
                 "OR": [
                     {"user_id": user_id},
                 ]
-            },
-            version="v2"
+            }
         )
         
         print(f"[DEBUG] search_memory result type: {type(memories)}")

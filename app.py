@@ -117,7 +117,7 @@ async def main():
             
             # Process request
             try:
-                with Status("Je réfléchis...", console=console, spinner="dots"):
+                with Status("[green]Je réfléchis...[/green]", console=console, spinner="dots"):
                     result = await Runner.run(last_agent, convo)
                
                 
