@@ -10,9 +10,10 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.columns import Columns
 from rich.rule import Rule
+from rich.status import Status
 from ui import (
     create_header, create_agents_info, create_commands_table,
-    display_response, show_thinking_message, clear_screen, show_help,
+    display_response, clear_screen, show_help,
     show_goodbye_message, show_error_panel, show_interrupt_message
 )
 from mem0 import MemoryClient
@@ -36,7 +37,6 @@ else:
 # Initialize agents
 agents = create_agents()
 
-# Create a session instance with a session ID
 
 async def main():
     # Setup UI
@@ -52,9 +52,21 @@ async def main():
     console.print()
     
     conversation_count = 0
-    # create user id
-    user_id = random.randint(1, 1000000)
-    print("user_id: ", user_id)
+    
+    # Get user ID from user input
+    console.print("[bold yellow]Configuration initiale[/bold yellow]")
+    user_id = Prompt.ask("[cyan]Entrez votre identifiant utilisateur[/cyan]", default=str(random.randint(1, 1000000)))
+    
+    # Convert to int if it's a number, otherwise keep as string
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        pass  # Keep as string if not a number
+    
+    console.print(f"[green]✓ Identifiant utilisateur: {user_id}[/green]")
+   
+
+    console.print()
     
     # Set global user context for memory tools
     current_user.set_user_id(user_id)
@@ -69,17 +81,17 @@ async def main():
     memory = client.get_all(user_id=user_id, filters=filters, version="v2")
     print("memory: ", memory)
     
-   # convo: list[TResponseInputItem] = []
+    convo: list[TResponseInputItem] = []
     last_agent = agents["trieur"]
 
     while True:
         try:
             # Get user input
             user_input = Prompt.ask(
-                f"[bold cyan]💬 Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
+                f"[bold cyan]Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
             ).strip()
-            #convo.append({"content": user_input, "role": "user"})
-            #print("Historique de conversation: ", convo)
+            convo.append({"content": user_input, "role": "user"})
+            print("Historique de conversation: ", convo)
             
             # Handle commands
             if user_input.lower() in ['quit', 'exit', 'q']:
@@ -104,12 +116,9 @@ async def main():
             print("conversation_count: ", conversation_count)
             
             # Process request
-            await show_thinking_message()
-            
             try:
-                
-                
-                result = await Runner.run(last_agent, user_input)
+                with Status("Je réfléchis...", console=console, spinner="dots"):
+                    result = await Runner.run(last_agent, convo)
                
                 
                 #response_text = ""
@@ -139,7 +148,7 @@ async def main():
                 continue
                 
             
-            #convo = result.to_input_list()
+            convo = result.to_input_list()
             
             
             

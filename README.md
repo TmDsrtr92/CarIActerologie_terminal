@@ -14,14 +14,45 @@ Système de caractérologie intelligent avec **interface Rich** utilisant l'IA e
 - **Indicateurs visuels** : spinners et messages de statut
 - **Formatage Markdown** pour les réponses
 
+### 👤 Configuration Utilisateur
+- **ID utilisateur personnalisable** : Choix de l'identifiant au démarrage
+- **Support multi-format** : Accepte nombres et texte (ex: "123" ou "john_doe")
+- **Valeur par défaut** : Nombre aléatoire proposé automatiquement
+- **Confirmation visuelle** : Affichage de l'ID sélectionné avec validation
+
 ### 🧠 Gestion de la Mémoire Conversationnelle
-- **Historique persistant** : Chaque conversation est mémorisée dans la variable `convo`
-- **Continuité contextuelle** : Les agents se souviennent des échanges précédents
-- **Structure de données** : `TResponseInputItem` pour compatibilité agents
-- **Mise à jour automatique** : L'historique se met à jour après chaque interaction
-- **Compteur de tours** : Suivi visuel du nombre d'échanges (#1, #2, etc.)
-- **Agent tracking** : Variable `last_agent` pour maintenir la continuité avec le dernier agent utilisé
-- **Handoffs intelligents** : Les agents peuvent se passer le relais en conservant l'historique
+
+#### 📝 Architecture Mémoire Duale
+Le système implémente deux niveaux de mémoire complémentaires :
+
+**🔄 Mémoire Court Terme (Session)**
+- **Méthode** : `to_input_list()` pour maintenir l'historique conversationnel
+- **Portée** : Limitée à la session courante
+- **Données** : Échanges utilisateur/agent dans l'ordre chronologique
+- **Reset** : Effacée à la fermeture de l'application
+- **Usage** : Contexte immédiat pour les agents
+
+**💾 Mémoire Long Terme (Persistante)**
+- **Méthode** : Outils `save_memory` et `search_memory` via Mem0
+- **Portée** : Persistante entre sessions via user_id
+- **Données** : Informations importantes sur l'utilisateur et ses caractéristiques
+- **Reset** : Conservée indéfiniment, liée à l'identifiant utilisateur
+- **Usage** : Profil utilisateur et apprentissage personnalisé
+
+#### 🔄 Implémentation Technique (app.py)
+**Mémoire Court Terme :**
+- **Initialisation** : `convo: list[TResponseInputItem] = []` (ligne 84)
+- **Ajout input utilisateur** : `convo.append({"content": user_input, "role": "user"})` (ligne 93)
+- **Debug historique** : `print("Historique de conversation: ", convo)` (ligne 94)
+- **Transmission aux agents** : `result = await Runner.run(last_agent, convo)` (ligne 120)
+- **Mise à jour post-réponse** : `convo = result.to_input_list()` (ligne 150)
+- **Persistance agent** : `last_agent = result.last_agent` pour continuité inter-tours
+
+**Mémoire Long Terme :**
+- **Sauvegarde** : Les agents utilisent `save_memory(content, user_id)` pour enregistrer des informations importantes
+- **Récupération** : Les agents utilisent `search_memory(query, user_id)` pour accéder aux souvenirs passés
+- **Liaison utilisateur** : Toutes les mémoires sont liées au `user_id` configuré au démarrage
+- **Continuité** : L'utilisateur retrouve ses informations en utilisant le même identifiant
 
 ## Architecture du Système
 

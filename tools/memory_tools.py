@@ -28,7 +28,16 @@ def search_memory(query: str, user_id: str = None) -> str:
         return "Error: No user ID available for memory search."
     
     try:
-        memories = mem0.search(query, user_id=user_id, limit=3)
+        #memories = mem0.search(query, user_id=user_id, limit=3, version="v2")
+        memories = mem0.get_all(
+            filters={
+                "OR": [
+                    {"user_id": user_id},
+                ]
+            },
+            version="v2"
+        )
+        
         print(f"[DEBUG] search_memory result type: {type(memories)}")
         print(f"[DEBUG] search_memory result: {memories}")
         
@@ -68,7 +77,7 @@ def save_memory(content: str, user_id: str = None) -> str:
         return "Error: No user ID available for saving memory."
     
     try:
-        result = mem0.add([{"role": "user", "content": content}], user_id=user_id)
+        result = mem0.add([{"role": "user", "content": content}], user_id=user_id, version="v2")
         print(f"[DEBUG] save_memory add result: {result}")
         return "Information saved to memory."
     except Exception as e:

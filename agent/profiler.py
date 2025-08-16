@@ -31,5 +31,5 @@ def create_profiler_agent():
         name="Profiler",
         instructions=instructions,
         output_type=UserProfile,
-        model="gpt-4o-mini",
+        model="gpt-4.1-mini",
     )

@@ -44,5 +44,5 @@ def create_trieur_agent():
     return Agent(
         name="Trieur",
         instructions=instructions,
-        model="gpt-4o-mini",
+        model="gpt-4.1-mini",
     )

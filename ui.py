@@ -96,15 +96,6 @@ def display_response(agent_name, response_text, response_type="response"):
     
     console.print(response_panel)
 
-async def show_thinking_message():
-    """Show a simple thinking message"""
-    thinking_panel = Panel(
-        Align.center("[bold blue] En pleine réflexion...[/bold blue]"),
-        border_style="blue",
-        padding=(0, 2)
-    )
-    console.print(thinking_panel)
-    await asyncio.sleep(0.5)  # Brief pause for visual feedback
 
 def clear_screen():
     """Clear the screen"""
