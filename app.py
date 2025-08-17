@@ -2,7 +2,11 @@ import os
 import asyncio
 import random
 from dotenv import load_dotenv
-# Import debug_utils early to configure logging before other libraries
+
+# Load environment variables FIRST
+load_dotenv()
+
+# Import debug_utils after loading environment variables
 from debug_utils import debug_print
 from agents import Runner, TResponseInputItem
 from agent_config import create_agents, get_agent_by_name
@@ -18,14 +22,15 @@ from ui import (
     display_response, clear_screen, show_help,
     show_goodbye_message, show_error_panel, show_interrupt_message
 )
-from mem0 import MemoryClient
+from mem0 import AsyncMemoryClient
 from user_context import current_user
 
-load_dotenv()
 console = Console()
 
+
+
 # Initialize Mem0 client
-client = MemoryClient()
+client = AsyncMemoryClient()
 
 
 
@@ -54,6 +59,11 @@ async def main():
     console.print()
     
     conversation_count = 0
+
+    # Test debug mode
+    print(f"DEBUG_MODE environment variable: {os.getenv('DEBUG_MODE')}")
+    from debug_utils import DEBUG_MODE
+    print(f"DEBUG_MODE in debug_utils: {DEBUG_MODE}")
     
     # Get user ID from user input
     debug_print("[bold yellow]Configuration initiale[/bold yellow]")
@@ -80,7 +90,7 @@ async def main():
             }
         ]
     }
-    memory = client.get_all(user_id=user_id, filters=filters, version="v2")
+    memory = await client.get_all(user_id=user_id, filters=filters, version="v2")
     debug_print("memory: ", memory)
     
     convo: list[TResponseInputItem] = []

@@ -1,19 +1,19 @@
 # Import debug_utils early to configure logging before other libraries  
 from debug_utils import debug_print
 from agents import Agent, Runner, function_tool
-from mem0 import MemoryClient
+from mem0 import AsyncMemoryClient
 from dotenv import load_dotenv
 from user_context import current_user
 
 load_dotenv()
 
 # Initialize memory client
-mem0 = MemoryClient()
+mem0 = AsyncMemoryClient()
 debug_print("Memory client initialized:", type(mem0))
 
 # Define memory tools for the agent
 @function_tool
-def search_memory(query: str, user_id: str = None) -> str:
+async def search_memory(query: str, user_id: str = None) -> str:
     """Search through past conversations and memories"""
     # Always use global context, ignore passed user_id
     passed_user_id = user_id
@@ -31,7 +31,7 @@ def search_memory(query: str, user_id: str = None) -> str:
     
     try:
         #memories = mem0.search(query, user_id=user_id, limit=3, version="v2")
-        memories = mem0.search(
+        memories = await mem0.search(
             query=query,
             version="v2",
             filters={
@@ -63,7 +63,7 @@ def search_memory(query: str, user_id: str = None) -> str:
         return f"Error searching memories: {e}"
 
 @function_tool
-def save_memory(content: str, user_id: str = None) -> str:
+async def save_memory(content: str, user_id: str = None) -> str:
     """Save important information to memory"""
     # Always use global context, ignore passed user_id
     passed_user_id = user_id
@@ -80,7 +80,7 @@ def save_memory(content: str, user_id: str = None) -> str:
         return "Error: No user ID available for saving memory."
     
     try:
-        result = mem0.add([{"role": "user", "content": content}], user_id=user_id, version="v2")
+        result = await mem0.add([{"role": "user", "content": content}], user_id=user_id, version="v2")
         debug_print(f"save_memory add result: {result}")
         return "Information saved to memory."
     except Exception as e:

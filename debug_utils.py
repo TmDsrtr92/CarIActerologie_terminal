@@ -10,27 +10,22 @@ if not DEBUG_MODE:
     os.environ['HTTPX_LOG_LEVEL'] = 'WARNING'
     os.environ['OPENAI_LOG_LEVEL'] = 'WARNING'
 
-# Configure logging
-if DEBUG_MODE:
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='[DEBUG] %(message)s'
-    )
-else:
-    # In production mode, suppress all logs below WARNING level
-    logging.basicConfig(
-        level=logging.WARNING,
-        format='%(message)s'
-    )
-    
-    # Suppress HTTP request logs from various libraries
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("openai").setLevel(logging.WARNING)
-    logging.getLogger("openai._client").setLevel(logging.WARNING)
-    logging.getLogger("openai.resources").setLevel(logging.WARNING)
+# Configure logging - always suppress library debug logs
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(message)s'
+)
+
+# Suppress debug logs from various libraries
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("openai._client").setLevel(logging.WARNING)
+logging.getLogger("openai.resources").setLevel(logging.WARNING)
+logging.getLogger("markdown_it").setLevel(logging.WARNING)
+logging.getLogger("rich").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
