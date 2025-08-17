@@ -2,6 +2,8 @@ import os
 import asyncio
 import random
 from dotenv import load_dotenv
+# Import debug_utils early to configure logging before other libraries
+from debug_utils import debug_print
 from agents import Runner, TResponseInputItem
 from agent_config import create_agents, get_agent_by_name
 from openai.types.responses import ResponseTextDeltaEvent
@@ -54,7 +56,7 @@ async def main():
     conversation_count = 0
     
     # Get user ID from user input
-    console.print("[bold yellow]Configuration initiale[/bold yellow]")
+    debug_print("[bold yellow]Configuration initiale[/bold yellow]")
     user_id = Prompt.ask("[cyan]Entrez votre identifiant utilisateur[/cyan]", default=str(random.randint(1, 1000000)))
     
     # Convert to int if it's a number, otherwise keep as string
@@ -63,7 +65,7 @@ async def main():
     except ValueError:
         pass  # Keep as string if not a number
     
-    console.print(f"[green]✓ Identifiant utilisateur: {user_id}[/green]")
+    debug_print(f"[green]✓ Identifiant utilisateur: {user_id}[/green]")
    
 
     console.print()
@@ -79,7 +81,7 @@ async def main():
         ]
     }
     memory = client.get_all(user_id=user_id, filters=filters, version="v2")
-    print("memory: ", memory)
+    debug_print("memory: ", memory)
     
     convo: list[TResponseInputItem] = []
     last_agent = agents["trieur"]
@@ -91,7 +93,7 @@ async def main():
                 f"[bold cyan]Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
             ).strip()
             convo.append({"content": user_input, "role": "user"})
-            print("Historique de conversation: ", convo)
+            debug_print("Historique de conversation: ", convo)
             
             # Handle commands
             if user_input.lower() in ['quit', 'exit', 'q']:
@@ -113,7 +115,7 @@ async def main():
                 continue
             
             conversation_count += 1
-            print("conversation_count: ", conversation_count)
+            debug_print("conversation_count: ", conversation_count)
             
             # Process request
             try:
@@ -130,8 +132,8 @@ async def main():
                 #        response_text += event.data.delta
                 
                 
-                # Clear processing message
-                console.print("\033[1A\033[K", end="")
+                # Clear processing message (using Rich method instead of raw ANSI)
+                pass
                 
                 # Display response
                 if result.final_output:

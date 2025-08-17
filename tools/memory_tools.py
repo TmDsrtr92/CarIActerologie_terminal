@@ -1,3 +1,5 @@
+# Import debug_utils early to configure logging before other libraries  
+from debug_utils import debug_print
 from agents import Agent, Runner, function_tool
 from mem0 import MemoryClient
 from dotenv import load_dotenv
@@ -7,7 +9,7 @@ load_dotenv()
 
 # Initialize memory client
 mem0 = MemoryClient()
-print("[DEBUG] Memory client initialized:", type(mem0))
+debug_print("Memory client initialized:", type(mem0))
 
 # Define memory tools for the agent
 @function_tool
@@ -18,11 +20,11 @@ def search_memory(query: str, user_id: str = None) -> str:
     user_id = current_user.get_user_id()
     
     if passed_user_id and passed_user_id != user_id:
-        print(f"[DEBUG] search_memory ignoring passed user_id '{passed_user_id}', using global user_id: {user_id}")
+        debug_print(f"search_memory ignoring passed user_id '{passed_user_id}', using global user_id: {user_id}")
     else:
-        print(f"[DEBUG] search_memory using global user_id: {user_id}")
+        debug_print(f"search_memory using global user_id: {user_id}")
     
-    print(f"[DEBUG] search_memory called with query='{query}', final user_id='{user_id}'")
+    debug_print(f"search_memory called with query='{query}', final user_id='{user_id}'")
     
     if user_id is None:
         return "Error: No user ID available for memory search."
@@ -39,25 +41,25 @@ def search_memory(query: str, user_id: str = None) -> str:
             }
         )
         
-        print(f"[DEBUG] search_memory result type: {type(memories)}")
-        print(f"[DEBUG] search_memory result: {memories}")
+        debug_print(f"search_memory result type: {type(memories)}")
+        debug_print(f"search_memory result: {memories}")
         
         # Handle both list format and dict format
         if isinstance(memories, list) and memories:
             # Direct list of memory objects
             result = "\n".join([f"- {mem['memory']}" for mem in memories])
-            print(f"[DEBUG] search_memory returning: {result}")
+            debug_print(f"search_memory returning: {result}")
             return result
         elif isinstance(memories, dict) and memories.get('results'):
             # Dict with 'results' key
             result = "\n".join([f"- {mem['memory']}" for mem in memories['results']])
-            print(f"[DEBUG] search_memory returning: {result}")
+            debug_print(f"search_memory returning: {result}")
             return result
         else:
-            print("[DEBUG] search_memory: No results found")
+            debug_print("search_memory: No results found")
             return "No relevant memories found."
     except Exception as e:
-        print(f"[DEBUG] search_memory ERROR: {e}")
+        debug_print(f"search_memory ERROR: {e}")
         return f"Error searching memories: {e}"
 
 @function_tool
@@ -68,21 +70,21 @@ def save_memory(content: str, user_id: str = None) -> str:
     user_id = current_user.get_user_id()
     
     if passed_user_id and passed_user_id != user_id:
-        print(f"[DEBUG] save_memory ignoring passed user_id '{passed_user_id}', using global user_id: {user_id}")
+        debug_print(f"save_memory ignoring passed user_id '{passed_user_id}', using global user_id: {user_id}")
     else:
-        print(f"[DEBUG] save_memory using global user_id: {user_id}")
+        debug_print(f"save_memory using global user_id: {user_id}")
     
-    print(f"[DEBUG] save_memory called with content='{content}', final user_id='{user_id}'")
+    debug_print(f"save_memory called with content='{content}', final user_id='{user_id}'")
     
     if user_id is None:
         return "Error: No user ID available for saving memory."
     
     try:
         result = mem0.add([{"role": "user", "content": content}], user_id=user_id, version="v2")
-        print(f"[DEBUG] save_memory add result: {result}")
+        debug_print(f"save_memory add result: {result}")
         return "Information saved to memory."
     except Exception as e:
-        print(f"[DEBUG] save_memory ERROR: {e}")
+        debug_print(f"save_memory ERROR: {e}")
         return f"Error saving memory: {e}"
 
 

@@ -61,7 +61,7 @@ def create_commands_table():
         table,
         title="[bold blue]📋 Commandes Utiles[/bold blue]",
         border_style="blue",
-        padding=(0, 1)
+        padding=(1, 1)
     )
 
 def create_status_panel(status_text, style="bold green"):
@@ -88,10 +88,10 @@ def display_response(agent_name, response_text, response_type="response"):
     response_panel = Panel(
         Markdown(response_text),
         title=f"[bold {color}]{emoji} {agent_name}[/bold {color}]",
-        title_align="center",
-        border_style=color,
+        title_align="left",
+        #border_style=color,
         padding=(1, 2),
-        box=ROUNDED
+        #box=ROUNDED
     )
     
     console.print(response_panel)
