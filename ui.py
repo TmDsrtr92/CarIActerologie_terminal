@@ -8,6 +8,8 @@ from rich.table import Table
 from rich.align import Align
 from rich.box import ROUNDED, DOUBLE_EDGE, MINIMAL_HEAVY_HEAD
 from rich.tree import Tree
+from rich.rule import Rule
+from rich.layout import Layout
 
 console = Console()
 
@@ -84,18 +86,10 @@ def display_response(agent_name, response_text, response_type="response"):
     
     color, emoji = agent_colors.get(agent_name, agent_colors["default"])
     
-    # Create response panel with agent branding
-    response_panel = Panel(
-        Markdown(response_text),
-        title=f"[bold {color}]{emoji} {agent_name}[/bold {color}]",
-        title_align="left",
-        #border_style=color,
-        padding=(1, 2),
-        #box=ROUNDED
-    )
-    
-    console.print(response_panel)
-
+    # Display response in the same format as user input but keep markdown, centered
+    console.print(f"[bold {color}]{agent_name}[/bold {color}]")
+    console.print(Markdown(response_text))
+    console.print()
 
 def clear_screen():
     """Clear the screen"""

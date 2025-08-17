@@ -57,7 +57,7 @@ async def main():
     
     # Get user ID from user input
     debug_print("[bold yellow]Configuration initiale[/bold yellow]")
-    user_id = Prompt.ask("[cyan]Entrez votre identifiant utilisateur[/cyan]", default=str(random.randint(1, 1000000)))
+    user_id = Prompt.ask("[cyan]Comment t'appelles-tu ?[/cyan]")
     
     # Convert to int if it's a number, otherwise keep as string
     try:
@@ -90,8 +90,8 @@ async def main():
         try:
             # Get user input
             user_input = Prompt.ask(
-                f"[bold cyan]Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
-            ).strip()
+                f"[bold cyan]Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]").strip()
+            console.print()
             convo.append({"content": user_input, "role": "user"})
             debug_print("Historique de conversation: ", convo)
             
