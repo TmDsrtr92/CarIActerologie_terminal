@@ -142,12 +142,17 @@ Chaque agent est maintenant dans son propre fichier dans le dossier `agent/`:
    - **Fonction** : `create_profiler_agent()`
 
 ### 🔍 Recherche Vectorielle (`tools/vector_search.py`)
-- Fonction `search_caracterologie_knowledge()` pour interroger la base de connaissances
-- Interface avec ChromaDB et embeddings OpenAI
+- **Fonction `search_caracterologie_knowledge()`** : Interrogation de la base de connaissances du traité de caractérologie
+- **Fonction `search_timidite_knowledge()`** : Recherche dans la base de connaissances sur la timidité
+- **Interface unifiée** avec ChromaDB et embeddings OpenAI
+- **Collections multiples** : Support de plusieurs bases de connaissances spécialisées
 
 ### 💾 Base de Données Vectorielle (`data/source/vector_stores/`)
-- ChromaDB persistant
-- Chunks du traité de caractérologie avec embeddings `text-embedding-3-large`
+- **ChromaDB persistant** avec collections multiples :
+  - **`traite_de_caracterologie_large_v1`** : Traité de caractérologie complet
+  - **`la_timidite_v3`** : Base de connaissances spécialisée sur la timidité
+- **Embeddings** : `text-embedding-3-large` pour toutes les collections
+- **Architecture modulaire** : Chaque collection accessible via son propre outil de recherche
 
 ## Workflow Global
 
@@ -169,18 +174,20 @@ Caractériologue Agent
 Décision: Utiliser l'outil de recherche
      ↓
 search_caracterologie_knowledge("caractérologie")
+ou
+search_timidite_knowledge("timidité")
 ```
 
 ### 3. Vector Search Process
 
 ```
-Query: "caractérologie"
+Query: "caractérologie" ou "timidité"
      ↓
 OpenAI Embeddings: text-embedding-3-large
      ↓
-ChromaDB: Similarity Search (k=5)
+ChromaDB: Similarity Search dans la collection appropriée (k=5)
      ↓
-Retrieved Documents: Top 5 chunks pertinents
+Retrieved Documents: Top 5 chunks pertinents de la base spécialisée
 ```
 
 ### 4. Response Generation
