@@ -9,13 +9,15 @@ def create_interrogateur_agent():
 
     ETAPE QUE TU DOIS REALISER POUR REPONDRE :
     1. Pose la première question à l'utilisateur (sur l'activité)
-    2. Enregistre la réponses dans la mémoire (avec l'outil save_memory)
+    2. Enregistre la réponses dans l'utilisateur dans la mémoire (avec l'outil save_memory)
     3. Vérifie quelles questions tu as déjà posées. Tu ne dois jamais poser deux fois la même question.
-    4. Pose la deuxième question à l'utilisateur (sur l'emotivité)
-    5. Enregistre la réponses dans la mémoire (avec l'outil save_memory)
-    6. Pose la troisième question à l'utilisateur (sur le retentissement)
-    7. Enregistre la réponses dans la mémoire (avec l'outil save_memory)
-    8. Vérifie si tu as déjà posé les trois questions (avec l'outil search_memory)
+    4. Explique ce que la réponse à sa première question signifie.
+    5. Pose la deuxième question à l'utilisateur (sur l'emotivité)
+    6. Enregistre la réponses de l'utilisateur dans la mémoire (avec l'outil save_memory)
+    7. Explique ce que la réponse à sa deuxième question signifie.
+    8. Pose la troisième question à l'utilisateur (sur le retentissement)
+    9. Enregistre la réponses dans l'utilisateur dans la mémoire (avec l'outil save_memory)
+    10. Vérifie si tu as déjà posé les trois questions (avec l'outil search_memory)
 
     PROCESSUS D'ÉVALUATION :    
     Deux scénarios possibles :

@@ -2,6 +2,12 @@ import os
 import asyncio
 import random
 from dotenv import load_dotenv
+
+# Load environment variables FIRST
+load_dotenv()
+
+# Import debug_utils after loading environment variables
+from debug_utils import debug_print
 from agents import Runner, TResponseInputItem
 from agent_config import create_agents, get_agent_by_name
 from openai.types.responses import ResponseTextDeltaEvent
@@ -16,14 +22,15 @@ from ui import (
     display_response, clear_screen, show_help,
     show_goodbye_message, show_error_panel, show_interrupt_message
 )
-from mem0 import MemoryClient
+from mem0 import AsyncMemoryClient
 from user_context import current_user
 
-load_dotenv()
 console = Console()
 
+
+
 # Initialize Mem0 client
-client = MemoryClient()
+client = AsyncMemoryClient()
 
 
 
@@ -52,10 +59,15 @@ async def main():
     console.print()
     
     conversation_count = 0
+
+    # Test debug mode
+    print(f"DEBUG_MODE environment variable: {os.getenv('DEBUG_MODE')}")
+    from debug_utils import DEBUG_MODE
+    print(f"DEBUG_MODE in debug_utils: {DEBUG_MODE}")
     
     # Get user ID from user input
-    console.print("[bold yellow]Configuration initiale[/bold yellow]")
-    user_id = Prompt.ask("[cyan]Entrez votre identifiant utilisateur[/cyan]", default=str(random.randint(1, 1000000)))
+    debug_print("[bold yellow]Configuration initiale[/bold yellow]")
+    user_id = Prompt.ask("[cyan]Comment t'appelles-tu ?[/cyan]")
     
     # Convert to int if it's a number, otherwise keep as string
     try:
@@ -63,7 +75,7 @@ async def main():
     except ValueError:
         pass  # Keep as string if not a number
     
-    console.print(f"[green]✓ Identifiant utilisateur: {user_id}[/green]")
+    debug_print(f"[green]✓ Identifiant utilisateur: {user_id}[/green]")
    
 
     console.print()
@@ -78,8 +90,8 @@ async def main():
             }
         ]
     }
-    memory = client.get_all(user_id=user_id, filters=filters, version="v2")
-    print("memory: ", memory)
+    memory = await client.get_all(user_id=user_id, filters=filters, version="v2")
+    debug_print("memory: ", memory)
     
     convo: list[TResponseInputItem] = []
     last_agent = agents["trieur"]
@@ -88,10 +100,10 @@ async def main():
         try:
             # Get user input
             user_input = Prompt.ask(
-                f"[bold cyan]Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]"
-            ).strip()
+                f"[bold cyan]Moi [/bold cyan] [dim](#{conversation_count + 1})[/dim]").strip()
+            console.print()
             convo.append({"content": user_input, "role": "user"})
-            print("Historique de conversation: ", convo)
+            debug_print("Historique de conversation: ", convo)
             
             # Handle commands
             if user_input.lower() in ['quit', 'exit', 'q']:
@@ -113,11 +125,11 @@ async def main():
                 continue
             
             conversation_count += 1
-            print("conversation_count: ", conversation_count)
+            debug_print("conversation_count: ", conversation_count)
             
             # Process request
             try:
-                with Status("Je réfléchis...", console=console, spinner="dots"):
+                with Status("[green]Je réfléchis...[/green]", console=console, spinner="dots"):
                     result = await Runner.run(last_agent, convo)
                
                 
@@ -130,8 +142,8 @@ async def main():
                 #        response_text += event.data.delta
                 
                 
-                # Clear processing message
-                console.print("\033[1A\033[K", end="")
+                # Clear processing message (using Rich method instead of raw ANSI)
+                pass
                 
                 # Display response
                 if result.final_output:

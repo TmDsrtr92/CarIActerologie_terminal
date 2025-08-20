@@ -6,11 +6,16 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
+from langchain_community.document_loaders import UnstructuredMarkdownLoader
+from langchain_core.documents import Document
 from dotenv import load_dotenv
+from docling.document_converter import DocumentConverter
+from langchain_text_splitters import MarkdownHeaderTextSplitter
+
 
 load_dotenv()
 
-file_path = ("data/source/traite_caracterologie.pdf")
+file_path = ("./data/source/la_timidite.pdf")
 
 def check_chroma_heartbeat(client, operation_name="operation"):
     """Check if ChromaDB is alive and return heartbeat timestamp"""
@@ -49,14 +54,36 @@ def add_documents_with_heartbeat_monitoring(vector_store, documents, client, bat
             raise
 
 # Step 1 - Load the PDF file
-print("Step 1: Loading PDF file...")
-loader = PyPDFLoader(file_path)
-pages = loader.load()
+#print("Step 1: Loading PDF file...")
+#loader = PyPDFLoader(file_path)
+#pages = loader.load()
+
+# Step 1 - Load the MD file
+print("Step 1: Loading MD file...")
+markdown_path = "./data/source/la_timidite.md"
+# Read raw markdown to preserve formatting
+with open(markdown_path, 'r', encoding='utf-8') as f:
+    markdown_text = f.read()
+
+print("Step 2: Splitting MD file into chunks...")
+headers_to_split_on = [
+    ("#", "Header 1"),
+    ("##", "Header 2"),
+    ("###", "Header 3"),
+]
+markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on)
+md_header_splits = markdown_splitter.split_text(markdown_text)
+print(md_header_splits)
 
 # Step 2 - Split the PDF file into chunks
-print("Step 2: Splitting PDF into chunks...")
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2171, chunk_overlap=0)
-texts = text_splitter.split_documents(pages)
+#text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+#texts = text_splitter.split_documents(pages)
+
+# Step 2 - Split the PDF file into chunks
+#print("Step 2: Splitting MD file into chunks...")
+#text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+#texts = text_splitter.split_documents(pages)
+
 
 # Step 3 - Create the vector store
 print("Step 3: Setting up vector store...")
@@ -69,7 +96,7 @@ try:
 
     # Create vector store
     vector_store = Chroma(
-        collection_name="traite_de_caracterologie_test",
+        collection_name="la_timidite_v3",
         embedding_function=embeddings,
         persist_directory="./data/source/vector_stores",
     )
@@ -78,7 +105,7 @@ try:
     print("Step 4: Adding documents with heartbeat monitoring...")
     add_documents_with_heartbeat_monitoring(
         vector_store,
-        texts,
+        md_header_splits,
         chroma_client,
         batch_size=50,  # Smaller batches for more frequent heartbeat checks
         heartbeat_interval=20  # Check heartbeat every 20 seconds
@@ -88,8 +115,7 @@ try:
     final_heartbeat = check_chroma_heartbeat(chroma_client, "completion")
 
     print(f"\nVector store created successfully!")
-    print(f"Processed {len(pages)} pages")
-    print(f"Created {len(texts)} text chunks")
+    print(f"Processed {len(md_header_splits)} text chunks")
     print(f"Saved to: ./data/source/vector_stores")
     print(f"Initial heartbeat: {initial_heartbeat}")
     print(f"Final heartbeat: {final_heartbeat}")

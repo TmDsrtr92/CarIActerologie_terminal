@@ -8,3 +8,5 @@ pypdf
 openai-agents[viz]
 rich
 mem0ai
+unstructured[md] nltk
+langchain-text-splitters
